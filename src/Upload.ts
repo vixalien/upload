@@ -13,6 +13,7 @@ export interface UploadOptions {
   url: string;
   headers?: HeadersInit;
   withCredentials?: boolean;
+  method?: string;
 }
 
 export interface UploadResponse {
@@ -66,6 +67,7 @@ export class Upload {
     | URLSearchParams
     | string;
   private url: string;
+  private method: string;
   private headers: Headers;
   private xhr?: XMLHttpRequest;
   private withCredentials?: boolean = false;
@@ -85,12 +87,13 @@ export class Upload {
 
     this.form = options.form;
     this.url = options.url;
+    this.method = options.method || 'POST';
     this.headers = new Headers(options.headers);
     this.withCredentials = options.withCredentials;
   }
 
   /**
-   * POSTs the form.
+   * Submits the form.
    */
   upload(): Promise<UploadResponse> {
     return new Promise<UploadResponse>((resolve, reject) => {
@@ -105,7 +108,7 @@ export class Upload {
           this.xhr.withCredentials = true;
         }
 
-        this.xhr.open('POST', this.url, true);
+        this.xhr.open(this.method, this.url, true);
 
         this.headers.forEach((value, key) => {
           this.xhr?.setRequestHeader(key, value);
@@ -222,8 +225,8 @@ export class Upload {
           hostname: url.hostname,
           port: url.port,
           path: url.pathname,
-          method: 'POST',
-          headers: {},
+          method: this.method,
+          headers: headers,
         };
 
         let formData: FormDataNode;
